@@ -1,7 +1,10 @@
 import os
 import requests
+import json
 from flask import Flask, request, jsonify
 from utils import make_push_bear_report
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -16,21 +19,30 @@ def ping():
 
 @app.route('/notify/push_bear', methods=['POST'])
 def push_bear():
-    status = request.form.get('status_message')
+    json_data = json.loads(request.data)
+
+    status = json_data.get('status_message')
     payload = {
         "text": f"Travis CI Build {status}",
         "sendkey": app.config['PUSH_BEAR_SEND_KEY'],
         "desp": make_push_bear_report(
-            request.form.get('status_message'),
-            request.form.get('build_url'),
-            request.form.get('started_at'),
-            request.form.get('duration'),
-            request.form.get('author_name'),
-            request.form.get('compare_url'),
+            json_data.get('status_message'),
+            json_data.get('build_url'),
+            json_data.get('started_at'),
+            json_data.get('duration'),
+            json_data.get('author_name'),
+            json_data.get('compare_url'),
         )
     }
 
-    resp = requests.get(app.config['PUSH_BEAR_API'], params=payload, verify=False)
+    session = requests.Session()
+    retry = Retry(connect=5, backoff_factor=0.5)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+    resp = session.get(app.config['PUSH_BEAR_API'], params=payload)
+
     return jsonify(resp.json()), resp.status_code
 
 
