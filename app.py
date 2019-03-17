@@ -19,7 +19,8 @@ def ping():
 
 @app.route('/notify/push_bear', methods=['POST'])
 def push_bear():
-    json_data = json.loads(request.data)
+
+    json_data = json.loads(request.form.get('payload'))
 
     status = json_data.get('status_message')
     payload = {
