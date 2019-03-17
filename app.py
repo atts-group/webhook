@@ -30,7 +30,7 @@ def push_bear():
         )
     }
 
-    resp = requests.get(app.config['PUSH_BEAR_API'], params=payload)
+    resp = requests.get(app.config['PUSH_BEAR_API'], params=payload, verify=False)
     return jsonify(resp.json()), resp.status_code
 
 
