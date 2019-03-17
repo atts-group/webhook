@@ -15,18 +15,18 @@ def ping():
 
 
 @app.route('/notify/push_bear', methods=['POST'])
-def server_chan():
-    status = request.json.get('status_message')
+def push_bear():
+    status = request.form.get('status_message')
     payload = {
         "text": f"Travis CI Build {status}",
         "sendkey": app.config['PUSH_BEAR_SEND_KEY'],
         "desp": make_push_bear_report(
-            request.json.get('status_message'),
-            request.json.get('build_url'),
-            request.json.get('started_at'),
-            request.json.get('duration'),
-            request.json.get('author_name'),
-            request.json.get('compare_url'),
+            request.form.get('status_message'),
+            request.form.get('build_url'),
+            request.form.get('started_at'),
+            request.form.get('duration'),
+            request.form.get('author_name'),
+            request.form.get('compare_url'),
         )
     }
 
